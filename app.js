@@ -1,14 +1,24 @@
 //Imports
 require('dotenv').config()
 const express = require('express')
+const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
 const app = express()
+var path = require('path')
+
+
+app.engine('html', require('ejs').renderFile);
+app.set('view engine', 'html');
+//app.use('/public', express.static(path.join(__dirname, 'public')))
+app.set('views', path.join(__dirname), '/views')
+
 
 //config JSON Response
 app.use(express.json())
+app.use(bodyParser.urlencoded({extended: true}))
 
 // Models
 const User = require('./models/User.js')
@@ -17,7 +27,11 @@ const res = require('express/lib/response')
 
 //ROTA PUBLICA
 app.get('/', (req, res) => {
-    res.status(200).json({msg:"bem vindo a nossa API"})
+    res.render('index');
+})
+app.get('/auth/register', (req, res) => {
+    console.log('opa')
+    res.render('register');
 })
 
 // ROTA PRIVADA
@@ -51,12 +65,13 @@ function checkToken(req, res, next){
 
 
 // Register User
-app.post('/auth/register', async(req, res) => {
+app.post('/', async(req, res) => {
     const {name, email, password, confirmPassword} = req.body
+    console.log(name)
 
     //VALIDATIONS
     if(!name){
-        return res.status(422).json({msg:'o nomee é obrigatorio'})
+        return res.status(422).json({msg:'o nome é obrigatorio'})
     }
     if(!email){
         return res.status(422).json({msg:'o email é obrigatorio'})
